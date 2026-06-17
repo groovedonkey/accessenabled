@@ -2,7 +2,8 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
@@ -12,8 +13,8 @@ const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 initializeApp();
 const db = getFirestore();
 
-// Puppeteer + axe-core need a generous timeout and memory ceiling.
-setGlobalOptions({ region: 'us-central1', memory: '1GiB', timeoutSeconds: 120, maxInstances: 10 });
+// Headless Chromium + axe-core need a generous timeout and memory ceiling.
+setGlobalOptions({ region: 'us-central1', memory: '2GiB', timeoutSeconds: 120, maxInstances: 10 });
 
 function normalizeUrl(raw) {
   let url = (raw || '').trim();
@@ -61,8 +62,10 @@ export const scanUrl = onCall(async (request) => {
   let browser;
   try {
     browser = await puppeteer.launch({
-      headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu']
+      args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      defaultViewport: { width: 1280, height: 1024 },
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless
     });
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 1024, deviceScaleFactor: 1 });
