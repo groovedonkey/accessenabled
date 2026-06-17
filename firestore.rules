@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Single-user mode: no authentication. Audits are openly accessible.
+    // NOTE: this trusts anyone with the project URL. Re-enable auth-based
+    // rules if the app ever becomes multi-user or handles sensitive data.
+    match /audits/{auditId} {
+      allow read, write: if true;
+    }
+  }
+}
