@@ -7,5 +7,11 @@ service cloud.firestore {
     match /audits/{auditId} {
       allow read, write: if true;
     }
+    // Public landing-page leads: anyone may submit a consultation request.
+    // Reads are closed so only the auditor (via console/admin) can review them.
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if false;
+    }
   }
 }

@@ -1,5 +1,20 @@
 {
   "projects": {
     "default": "accessenabled-3e90e"
+  },
+  "targets": {
+    "accessenabled-3e90e": {
+      "hosting": {
+        "landing": [
+          "accessenabled-3e90e"
+        ],
+        "scanner": [
+          "accessenabled-audit"
+        ],
+        "mock": [
+          "accessenabled-testsite"
+        ]
+      }
+    }
   }
 }

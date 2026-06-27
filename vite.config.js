@@ -12,8 +12,8 @@ export default defineConfig({
         name: 'AccessEnabled',
         short_name: 'AccessEnabled',
         description: 'Website & physical-location accessibility audit platform',
-        theme_color: '#0b5cab',
-        background_color: '#0f172a',
+        theme_color: '#0a0a0a',
+        background_color: '#0a0a0a',
         display: 'standalone',
         orientation: 'any',
         start_url: '/',
@@ -25,6 +25,9 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.origin === self.location.origin,
