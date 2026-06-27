@@ -2,7 +2,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import AuditView from './pages/AuditView.jsx';
+import Login from './pages/Login.jsx';
 import Layout from './components/Layout.jsx';
+import { useAuth } from './AuthContext.jsx';
 import './landing.css';
 
 // Internal scan-tool pages share the Layout (the "me"-facing app).
@@ -19,6 +21,15 @@ const SCANNER_HOSTS = ['accessenabled-audit.web.app', 'accessenabled-audit.fireb
 const isScannerHost = typeof window !== 'undefined' && SCANNER_HOSTS.includes(window.location.hostname);
 
 function ScannerApp() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="centered-screen"><div className="spinner" aria-label="Loading" /></div>;
+  }
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <Routes>
       <Route path="/" element={tool(Dashboard)} />

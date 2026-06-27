@@ -18,7 +18,7 @@ export default function Dashboard() {
   const load = async () => {
     setLoading(true);
     try {
-      setAudits(await listAudits(user.uid));
+      setAudits(await listAudits());
     } catch (e) {
       console.error(e);
     } finally {

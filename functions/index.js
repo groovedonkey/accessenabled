@@ -17,6 +17,19 @@ const db = getFirestore();
 // Whole-site scans (up to SITE_MAX_PAGES) need more headroom than a single page.
 setGlobalOptions({ region: 'us-central1', memory: '2GiB', timeoutSeconds: 300, maxInstances: 10 });
 
+// Private single-auditor tool: only this verified Google account may invoke the
+// scan engine. Keep in sync with ALLOWED_EMAIL in src/AuthContext.jsx and the
+// email in firestore.rules.
+const ALLOWED_EMAIL = 'littlepete1976@gmail.com';
+
+function assertAuthorized(request) {
+  const token = request.auth?.token;
+  if (!token) throw new HttpsError('unauthenticated', 'Sign-in required.');
+  if (token.email !== ALLOWED_EMAIL || token.email_verified !== true) {
+    throw new HttpsError('permission-denied', 'This account is not authorized to run scans.');
+  }
+}
+
 // Whole-site crawl limits.
 const SITE_MAX_PAGES = 10;
 const SITE_TIME_BUDGET_MS = 270000; // stop crawling before the 300s function timeout
@@ -61,7 +74,7 @@ async function runDetectors(page) {
 }
 
 export const scanUrl = onCall(async (request) => {
-  // Single-user mode: no auth required.
+  assertAuthorized(request);
   const url = normalizeUrl(request.data?.url);
   const scope = request.data?.scope === 'site' ? 'site' : 'page';
   const maxPages = scope === 'site'
@@ -251,4 +264,7 @@ function finalizeRule(r) {
 }
 
 // Optional helper kept server-side so audit deletes cascade cleanly later.
-export const ping = onCall(async () => ({ pong: true, at: FieldValue.serverTimestamp ? 'ok' : 'ok' }));
+export const ping = onCall(async (request) => {
+  assertAuthorized(request);
+  return { pong: true, at: FieldValue.serverTimestamp ? 'ok' : 'ok' };
+});
