@@ -47,9 +47,10 @@ export async function removeAudit(id) {
 }
 
 // Invokes the Puppeteer + axe-core Cloud Function.
-const scanUrlCallable = httpsCallable(functions, 'scanUrl', { timeout: 120000 });
+// Whole-site scans crawl up to 10 pages, so allow the full server timeout.
+const scanUrlCallable = httpsCallable(functions, 'scanUrl', { timeout: 300000 });
 
-export async function runScan(url) {
-  const res = await scanUrlCallable({ url });
+export async function runScan(url, scope = 'page', maxPages = 10) {
+  const res = await scanUrlCallable({ url, scope, maxPages });
   return res.data;
 }

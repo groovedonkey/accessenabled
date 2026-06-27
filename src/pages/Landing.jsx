@@ -12,8 +12,8 @@ const PLANS = [
     name: 'Free Consultation',
     price: 'Free',
     priceNote: 'No card required',
-    tagline: 'Start here',
-    featured: false,
+    tagline: 'Most popular',
+    featured: true,
     cta: 'Book free consultation',
     blurb: 'A no-cost conversation plus an initial electronic scan of your website to show where you stand today.',
     features: [
@@ -30,8 +30,8 @@ const PLANS = [
     price: '$99',
     oldPrice: '$149',
     priceNote: 'Limited-time promo',
-    tagline: 'Most popular',
-    featured: true,
+    tagline: 'Self-Guided',
+    featured: false,
     cta: 'Get the DIY kit',
     blurb: 'The complete AccessEnabled ADA checklist so your team can run an unofficial, self-guided audit at your own pace.',
     features: [
@@ -262,7 +262,7 @@ export default function Landing() {
                 </label>
                 {status === 'error' && <p className="lp-form-error">Something went wrong. Please try again.</p>}
                 <button className="lp-btn lp-btn-primary lp-form-submit" type="submit" disabled={status === 'sending'}>
-                  {status === 'sending' ? 'Sending…' : 'Request free scan'} <ArrowRight size={18} />
+                  {status === 'sending' ? 'Sending…' : 'Submit'} <ArrowRight size={18} />
                 </button>
                 <p className="lp-form-fine">We’ll only use your details to follow up about your accessibility audit.</p>
               </>

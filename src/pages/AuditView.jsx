@@ -17,6 +17,7 @@ export default function AuditView() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [scanScope, setScanScope] = useState('page');
   const [scanError, setScanError] = useState('');
   const [saved, setSaved] = useState(true);
   const saveTimer = useRef(null);
@@ -61,7 +62,7 @@ export default function AuditView() {
     setScanning(true);
     setScanError('');
     try {
-      const scan = await runScan(url);
+      const scan = await runScan(url, scanScope);
       setResults((prev) => {
         const merged = applyScanToResults(scan, prev);
         const meta = {
@@ -71,7 +72,10 @@ export default function AuditView() {
           pageTitle: scan.pageTitle,
           axeVersion: scan.axeVersion,
           durationMs: scan.durationMs,
-          violationCount: (scan.violations || []).length
+          violationCount: (scan.violations || []).length,
+          scope: scan.scope || 'page',
+          pagesScanned: scan.pagesScanned || 1,
+          pages: scan.pages || []
         };
         saveAudit(id, { results: merged, scanMeta: meta, status: 'scanned' }).then(() => setSaved(true));
         setAudit((a) => ({ ...a, scanMeta: meta, status: 'scanned' }));
@@ -100,6 +104,30 @@ export default function AuditView() {
           <a href={audit.url} target="_blank" rel="noreferrer" className="audit-url">{audit.url}</a>
         </div>
         <div className="audit-header-actions">
+          <div className="scan-scope" role="radiogroup" aria-label="Scan scope">
+            <label className={scanScope === 'page' ? 'active' : ''}>
+              <input
+                type="radio"
+                name="scan-scope"
+                value="page"
+                checked={scanScope === 'page'}
+                onChange={() => setScanScope('page')}
+                disabled={scanning}
+              />
+              This page
+            </label>
+            <label className={scanScope === 'site' ? 'active' : ''}>
+              <input
+                type="radio"
+                name="scan-scope"
+                value="site"
+                checked={scanScope === 'site'}
+                onChange={() => setScanScope('site')}
+                disabled={scanning}
+              />
+              Whole site (up to 10 pages)
+            </label>
+          </div>
           <button className="btn btn-primary" onClick={() => doScan()} disabled={scanning}>
             {scanning ? <Loader2 size={18} className="spin" /> : <Play size={18} />}
             {scanning ? 'Scanning…' : audit.scanMeta ? 'Re-scan' : 'Run scan'}
@@ -129,9 +157,27 @@ export default function AuditView() {
       {audit.scanMeta && (
         <p className="scan-meta">
           Last scanned {new Date(audit.scanMeta.scannedAt).toLocaleString()} ·
-          HTTP {audit.scanMeta.statusCode} · axe-core {audit.scanMeta.axeVersion} ·
-          {audit.scanMeta.violationCount} rule violations
+          {audit.scanMeta.scope === 'site'
+            ? ` ${audit.scanMeta.pagesScanned} page${audit.scanMeta.pagesScanned === 1 ? '' : 's'} crawled`
+            : ` HTTP ${audit.scanMeta.statusCode}`} ·
+          axe-core {audit.scanMeta.axeVersion} · {audit.scanMeta.violationCount} rule violations
         </p>
+      )}
+
+      {audit.scanMeta?.scope === 'site' && audit.scanMeta.pages?.length > 0 && (
+        <details className="scanned-pages">
+          <summary>{audit.scanMeta.pages.length} pages scanned</summary>
+          <ul>
+            {audit.scanMeta.pages.map((p, i) => (
+              <li key={i}>
+                <span className="scanned-page-url">{p.url}</span>
+                {p.error
+                  ? <span className="scanned-page-err">failed: {p.error}</span>
+                  : <span className="scanned-page-stat">HTTP {p.statusCode} · {p.violationCount} violations</span>}
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       {CHECKLIST.map((section) => (

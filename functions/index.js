@@ -14,7 +14,13 @@ initializeApp();
 const db = getFirestore();
 
 // Headless Chromium + axe-core need a generous timeout and memory ceiling.
-setGlobalOptions({ region: 'us-central1', memory: '2GiB', timeoutSeconds: 120, maxInstances: 10 });
+// Whole-site scans (up to SITE_MAX_PAGES) need more headroom than a single page.
+setGlobalOptions({ region: 'us-central1', memory: '2GiB', timeoutSeconds: 300, maxInstances: 10 });
+
+// Whole-site crawl limits.
+const SITE_MAX_PAGES = 10;
+const SITE_TIME_BUDGET_MS = 270000; // stop crawling before the 300s function timeout
+const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 
 function normalizeUrl(raw) {
   let url = (raw || '').trim();
@@ -57,7 +63,12 @@ async function runDetectors(page) {
 export const scanUrl = onCall(async (request) => {
   // Single-user mode: no auth required.
   const url = normalizeUrl(request.data?.url);
+  const scope = request.data?.scope === 'site' ? 'site' : 'page';
+  const maxPages = scope === 'site'
+    ? Math.min(SITE_MAX_PAGES, Math.max(1, Number(request.data?.maxPages) || SITE_MAX_PAGES))
+    : 1;
   const startedAt = Date.now();
+  const origin = new URL(url).origin;
 
   let browser;
   try {
@@ -71,39 +82,110 @@ export const scanUrl = onCall(async (request) => {
     await page.setViewport({ width: 1280, height: 1024, deviceScaleFactor: 1 });
     await page.setUserAgent('Mozilla/5.0 (AccessEnabled audit bot) Chrome');
 
-    const response = await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
-    const finalUrl = page.url();
-    const statusCode = response ? response.status() : null;
-    const pageTitle = await page.title();
+    // Aggregation across pages. A rule failing on ANY page = a violation.
+    const violAgg = {};
+    const incAgg = {};
+    const passSet = new Set();
+    const detectorsAgg = {
+      accessibilityStatement: { found: false, href: null },
+      overlayReliance: { found: false, vendors: [] }
+    };
 
-    // Inject axe and run against WCAG 2.1/2.2 A & AA rule sets.
-    await page.evaluate(axeSource);
-    const axeResults = await page.evaluate(async () => {
-      // eslint-disable-next-line no-undef
-      return await axe.run(document, {
-        runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'] },
-        resultTypes: ['violations', 'passes', 'incomplete']
+    const visited = new Set();
+    const queue = [url];
+    const pages = [];
+    let firstMeta = null;
+
+    while (queue.length && visited.size < maxPages) {
+      if (visited.size > 0 && Date.now() - startedAt > SITE_TIME_BUDGET_MS) break;
+      const target = queue.shift().split('#')[0];
+      if (visited.has(target)) continue;
+      visited.add(target);
+
+      const pageStart = Date.now();
+      let response;
+      try {
+        response = await page.goto(target, {
+          waitUntil: 'networkidle2',
+          timeout: scope === 'site' ? 45000 : 60000
+        });
+      } catch (navErr) {
+        pages.push({ url: target, statusCode: null, error: navErr.message });
+        continue;
+      }
+
+      const finalUrl = page.url();
+      const statusCode = response ? response.status() : null;
+      const pageTitle = await page.title();
+      const pagePath = (() => { try { return new URL(finalUrl).pathname || '/'; } catch { return finalUrl; } })();
+
+      // Inject axe and run against WCAG 2.1/2.2 A & AA rule sets.
+      await page.evaluate(axeSource);
+      const axeResults = await page.evaluate(async (tags) => {
+        // eslint-disable-next-line no-undef
+        return await axe.run(document, {
+          runOnly: { type: 'tag', values: tags },
+          resultTypes: ['violations', 'passes', 'incomplete']
+        });
+      }, AXE_TAGS);
+
+      const detectors = await runDetectors(page);
+
+      axeResults.violations.forEach((r) => mergeRule(violAgg, r, pagePath, scope));
+      axeResults.incomplete.forEach((r) => mergeRule(incAgg, r, pagePath, scope));
+      axeResults.passes.forEach((r) => passSet.add(r.id));
+
+      if (detectors.accessibilityStatement.found && !detectorsAgg.accessibilityStatement.found) {
+        detectorsAgg.accessibilityStatement = { found: true, href: detectors.accessibilityStatement.href };
+      }
+      if (detectors.overlayReliance.found) {
+        detectorsAgg.overlayReliance.found = true;
+        detectors.overlayReliance.vendors.forEach((v) => {
+          if (!detectorsAgg.overlayReliance.vendors.includes(v)) detectorsAgg.overlayReliance.vendors.push(v);
+        });
+      }
+
+      if (!firstMeta) {
+        firstMeta = { url: finalUrl, statusCode, pageTitle, axeVersion: axeResults.testEngine?.version || null };
+      }
+
+      pages.push({
+        url: finalUrl,
+        statusCode,
+        pageTitle,
+        violationCount: axeResults.violations.length,
+        durationMs: Date.now() - pageStart
       });
-    });
 
-    const detectors = await runDetectors(page);
+      // Discover more same-origin links to crawl (whole-site only).
+      if (scope === 'site' && visited.size < maxPages) {
+        const links = await extractLinks(page, origin);
+        for (const link of links) {
+          const clean = link.split('#')[0];
+          if (!visited.has(clean) && !queue.includes(clean)) queue.push(clean);
+        }
+      }
+    }
 
     await browser.close();
     browser = null;
 
     return {
       ok: true,
-      url: finalUrl,
+      url: firstMeta?.url || url,
       requestedUrl: url,
-      statusCode,
-      pageTitle,
+      statusCode: firstMeta ? firstMeta.statusCode : null,
+      pageTitle: firstMeta?.pageTitle || '',
       scannedAt: new Date().toISOString(),
       durationMs: Date.now() - startedAt,
-      axeVersion: axeResults.testEngine?.version || null,
-      violations: axeResults.violations.map(simplifyRule),
-      passes: axeResults.passes.map((r) => r.id),
-      incomplete: axeResults.incomplete.map(simplifyRule),
-      detectors
+      axeVersion: firstMeta?.axeVersion || null,
+      scope,
+      pagesScanned: pages.filter((p) => !p.error).length,
+      pages,
+      violations: Object.values(violAgg).map(finalizeRule),
+      passes: Array.from(passSet),
+      incomplete: Object.values(incAgg).map(finalizeRule),
+      detectors: detectorsAgg
     };
   } catch (err) {
     if (browser) { try { await browser.close(); } catch { /* ignore */ } }
@@ -112,19 +194,59 @@ export const scanUrl = onCall(async (request) => {
   }
 });
 
-function simplifyRule(r) {
+// Collect same-origin, crawlable links from the current page.
+async function extractLinks(page, origin) {
+  return page.evaluate((origin) => {
+    const out = new Set();
+    document.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (!href) return;
+      try {
+        const u = new URL(href, document.baseURI);
+        if (u.origin !== origin) return;
+        if (!['http:', 'https:'].includes(u.protocol)) return;
+        u.hash = '';
+        if (/\.(pdf|jpe?g|png|gif|svg|webp|ico|zip|gz|mp4|mp3|mov|avi|docx?|xlsx?|pptx?|csv|css|js|json|xml|rss)$/i.test(u.pathname)) return;
+        out.add(u.toString());
+      } catch { /* ignore malformed hrefs */ }
+    });
+    return Array.from(out);
+  }, origin);
+}
+
+// Merge an axe rule result into the cross-page aggregate keyed by rule id.
+function mergeRule(agg, r, pagePath, scope) {
+  const nodes = (r.nodes || []).map((n) => ({
+    target: n.target,
+    html: (n.html || '').slice(0, 400),
+    failureSummary: scope === 'site'
+      ? `[${pagePath}] ${n.failureSummary || ''}`.trim()
+      : (n.failureSummary || ''),
+    page: pagePath
+  }));
+  const existing = agg[r.id];
+  if (!existing) {
+    agg[r.id] = {
+      id: r.id, impact: r.impact, help: r.help, helpUrl: r.helpUrl, tags: r.tags,
+      _nodes: nodes, _pages: new Set([pagePath])
+    };
+  } else {
+    existing._nodes.push(...nodes);
+    existing._pages.add(pagePath);
+  }
+}
+
+// Finalize an aggregated rule into the client-facing shape.
+function finalizeRule(r) {
   return {
     id: r.id,
     impact: r.impact,
     help: r.help,
     helpUrl: r.helpUrl,
     tags: r.tags,
-    nodes: (r.nodes || []).slice(0, 25).map((n) => ({
-      target: n.target,
-      html: (n.html || '').slice(0, 400),
-      failureSummary: n.failureSummary || ''
-    })),
-    nodeCount: (r.nodes || []).length
+    nodes: r._nodes.slice(0, 25),
+    nodeCount: r._nodes.length,
+    pageCount: r._pages ? r._pages.size : 1
   };
 }
 
