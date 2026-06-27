@@ -1,14 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Single-user mode: no authentication. Audits are openly accessible.
-    // NOTE: this trusts anyone with the project URL. Re-enable auth-based
-    // rules if the app ever becomes multi-user or handles sensitive data.
+    // Private single-auditor tool: only the one authorized, verified Google
+    // account may read or write audits. Keep this email in sync with
+    // ALLOWED_EMAIL in src/AuthContext.jsx and functions/index.js.
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == 'littlepete1976@gmail.com';
+    }
+
     match /audits/{auditId} {
-      allow read, write: if true;
+      allow read, write: if isOwner();
     }
     // Public landing-page leads: anyone may submit a consultation request.
-    // Reads are closed so only the auditor (via console/admin) can review them.
+    // Reads/updates are closed so only the auditor (via console/admin) can review.
     match /leads/{leadId} {
       allow create: if true;
       allow read, update, delete: if false;

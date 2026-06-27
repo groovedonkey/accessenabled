@@ -3,7 +3,7 @@
 
 import {
   collection, doc, addDoc, updateDoc, deleteDoc, getDoc, getDocs,
-  query, where, orderBy, serverTimestamp
+  query, orderBy, serverTimestamp
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from './firebase';
@@ -32,8 +32,12 @@ export async function getAudit(id) {
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-export async function listAudits(uid) {
-  const q = query(auditsRef, where('ownerUid', '==', uid), orderBy('updatedAt', 'desc'));
+// Single-auditor tool: access is locked to one account (see AuthContext /
+// firestore.rules), so every audit in the collection belongs to that user.
+// We list them all rather than filtering by uid, which also keeps audits
+// created before sign-in was enabled visible.
+export async function listAudits() {
+  const q = query(auditsRef, orderBy('updatedAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }

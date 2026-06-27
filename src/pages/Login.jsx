@@ -3,7 +3,7 @@ import { LogIn, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../AuthContext.jsx';
 
 export default function Login() {
-  const { signIn } = useAuth();
+  const { signIn, authError } = useAuth();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -13,11 +13,17 @@ export default function Login() {
     try {
       await signIn();
     } catch (e) {
-      setError(e.message || 'Sign-in failed.');
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') {
+        setError('');
+      } else {
+        setError(e.message || 'Sign-in failed.');
+      }
     } finally {
       setBusy(false);
     }
   };
+
+  const shownError = error || authError;
 
   return (
     <div className="login-screen">
@@ -31,8 +37,8 @@ export default function Login() {
           <LogIn size={18} />
           {busy ? 'Signing in…' : 'Sign in with Google'}
         </button>
-        {error && <p className="error-text">{error}</p>}
-        <p className="fineprint">WCAG 2.1 / 2.2 • ADA Title III • Section 508 • EAA</p>
+        {shownError && <p className="error-text">{shownError}</p>}
+        <p className="fineprint">Private auditor access only.</p>
       </div>
     </div>
   );
