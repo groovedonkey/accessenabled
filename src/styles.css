@@ -271,9 +271,20 @@ a { color: var(--primary); }
 
 .wizard-scan-findings { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 18px; }
 .wizard-scan-findings h2 { display: flex; align-items: center; gap: 7px; font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
-.wizard-finding { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; padding: 5px 0; border-bottom: 1px dashed var(--border); }
-.wizard-finding:last-child { border-bottom: none; }
-.wizard-finding code { font-size: 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; }
+.wizard-finding-group { padding: 10px 0; border-bottom: 1px dashed var(--border); }
+.wizard-finding-group:last-child { border-bottom: none; padding-bottom: 0; }
+.wizard-finding-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wizard-finding-head code { font-size: 12px; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; }
+.wizard-finding-help { font-size: 13.5px; color: var(--text); opacity: .9; margin: 6px 0 0; line-height: 1.5; }
+.wizard-finding-help a { color: var(--primary); font-weight: 600; }
+.wizard-instances { list-style: none; counter-reset: inst; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wizard-instance { counter-increment: inst; position: relative; padding: 8px 10px 8px 34px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
+.wizard-instance::before { content: counter(inst); position: absolute; left: 8px; top: 8px; min-width: 18px; height: 18px; padding: 0 4px; display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; color: var(--on-primary); background: var(--fail); border-radius: 999px; }
+.wizard-instance-page { display: inline-block; font-size: 11px; font-weight: 700; color: var(--primary); background: var(--manual-bg); padding: 1px 7px; border-radius: 6px; margin-bottom: 5px; margin-right: 6px; }
+.wizard-instance-rule { display: inline-block; font-size: 11px; font-weight: 600; color: var(--muted); border: 1px solid var(--border); padding: 1px 6px; border-radius: 6px; margin-bottom: 5px; }
+.wizard-instance-target { display: block; font-size: 12px; color: var(--manual); word-break: break-all; }
+.wizard-instance-html { font-size: 11.5px; background: #000; color: #d4e84a; border: 1px solid var(--border); padding: 7px 9px; border-radius: 6px; overflow-x: auto; margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; }
+.wizard-instance-more { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; font-style: italic; }
 
 .wizard-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
 .wizard-section-tag { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--primary); margin-bottom: 12px; }

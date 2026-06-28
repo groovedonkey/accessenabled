@@ -244,7 +244,7 @@ function finalizeRule(r) {
     help: r.help,
     helpUrl: r.helpUrl,
     tags: r.tags,
-    nodes: r._nodes.slice(0, 25),
+    nodes: r._nodes.slice(0, 100),
     nodeCount: r._nodes.length,
     pageCount: r._pages ? r._pages.size : 1
   };

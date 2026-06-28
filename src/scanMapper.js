@@ -95,7 +95,8 @@ function toFinding(kind, rule) {
     help: rule.help,
     helpUrl: rule.helpUrl,
     nodeCount: rule.nodeCount,
-    nodes: (rule.nodes || []).slice(0, 8)
+    // Keep every reported instance so the auditor can repair each individually.
+    nodes: rule.nodes || []
   };
 }
 

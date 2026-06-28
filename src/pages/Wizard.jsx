@@ -244,13 +244,41 @@ export default function Wizard() {
         {currentResult.findings && currentResult.findings.length > 0 && (
           <div className="wizard-scan-findings">
             <h2><ScanLine size={16} /> What the scan found</h2>
-            {currentResult.findings.slice(0, 6).map((f, i) => (
-              <div key={i} className="wizard-finding">
-                {f.ruleId && <code>{f.ruleId}</code>}
-                <span>{f.help || f.summary || f.failureSummary || 'Issue detected'}</span>
-                {f.nodeCount > 0 && <span className="node-count">{f.nodeCount} instance{f.nodeCount === 1 ? '' : 's'}</span>}
-              </div>
-            ))}
+            {currentResult.findings.map((f, i) => {
+              const nodes = f.nodes || [];
+              const showPage = audit.scanMeta?.scope === 'site';
+              return (
+                <div key={i} className="wizard-finding-group">
+                  <div className="wizard-finding-head">
+                    {f.ruleId && <code>{f.ruleId}</code>}
+                    {f.impact && <span className={`impact impact-${f.impact}`}>{f.impact}</span>}
+                    {f.nodeCount > 0 && <span className="node-count">{f.nodeCount} instance{f.nodeCount === 1 ? '' : 's'}</span>}
+                  </div>
+                  {(f.help || f.summary) && (
+                    <p className="wizard-finding-help">
+                      {f.help || f.summary}{' '}
+                      {f.helpUrl && <a href={f.helpUrl} target="_blank" rel="noreferrer">Learn more</a>}
+                    </p>
+                  )}
+                  {nodes.length > 0 && (
+                    <ol className="wizard-instances">
+                      {nodes.map((n, j) => (
+                        <li key={j} className="wizard-instance">
+                          {showPage && n.page && <span className="wizard-instance-page">{n.page}</span>}
+                          <code className="wizard-instance-target">
+                            {Array.isArray(n.target) ? n.target.join(' ') : (n.target || '—')}
+                          </code>
+                          {n.html && <pre className="wizard-instance-html">{n.html}</pre>}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                  {f.nodeCount > nodes.length && (
+                    <p className="wizard-instance-more">+{f.nodeCount - nodes.length} more instance{f.nodeCount - nodes.length === 1 ? '' : 's'} not listed</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -402,12 +430,20 @@ function Summary({ audit, results, summary, onReview, onExit }) {
           <ul className="wizard-fixlist">
             {failed.map(({ item }) => {
               const rem = getRemediation(item.ref);
-              const note = results[item.ref]?.note;
+              const res = results[item.ref] || {};
+              const note = res.note;
+              const findings = res.findings || [];
+              const showPage = audit.scanMeta?.scope === 'site';
+              const instances = findings.flatMap((f) =>
+                (f.nodes || []).map((n) => ({ ...n, ruleId: f.ruleId }))
+              );
+              const totalCount = findings.reduce((sum, f) => sum + (f.nodeCount || (f.nodes || []).length), 0);
               return (
                 <li key={item.ref} className="wizard-fixlist-item">
                   <div className="wizard-fixlist-head">
                     <span className="ref-pill">{item.ref}</span>
                     <strong>{item.title}</strong>
+                    {totalCount > 0 && <span className="node-count">{totalCount} instance{totalCount === 1 ? '' : 's'}</span>}
                   </div>
                   {note && <p className="wizard-fixlist-note">Note: {note}</p>}
                   {rem && (
@@ -422,6 +458,23 @@ function Summary({ audit, results, summary, onReview, onExit }) {
                         </a>
                       )}
                     </>
+                  )}
+                  {instances.length > 0 && (
+                    <ol className="wizard-instances">
+                      {instances.map((n, j) => (
+                        <li key={j} className="wizard-instance">
+                          {showPage && n.page && <span className="wizard-instance-page">{n.page}</span>}
+                          {n.ruleId && <span className="wizard-instance-rule">{n.ruleId}</span>}
+                          <code className="wizard-instance-target">
+                            {Array.isArray(n.target) ? n.target.join(' ') : (n.target || '—')}
+                          </code>
+                          {n.html && <pre className="wizard-instance-html">{n.html}</pre>}
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                  {totalCount > instances.length && (
+                    <p className="wizard-instance-more">+{totalCount - instances.length} more instance{totalCount - instances.length === 1 ? '' : 's'} not listed</p>
                   )}
                 </li>
               );
