@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Save, FileDown, Loader2, CheckCircle2 } from 'lucide-react';
 import { getAudit, saveAudit, runScan } from '../auditService.js';
 import { CHECKLIST, summarize } from '../checklist.js';
@@ -10,7 +10,6 @@ import { exportAuditPdf } from '../exportPdf.js';
 
 export default function AuditView() {
   const { id } = useParams();
-  const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [audit, setAudit] = useState(null);
@@ -29,11 +28,6 @@ export default function AuditView() {
       setAudit(a);
       setResults(a.results || {});
       setLoading(false);
-      if (params.get('autoscan') === '1') {
-        params.delete('autoscan');
-        setParams(params, { replace: true });
-        doScan(a.url);
-      }
     })();
     // eslint-disable-next-line
   }, [id]);

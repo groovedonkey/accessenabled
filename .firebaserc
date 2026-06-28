@@ -11,10 +11,14 @@
         "scanner": [
           "accessenabled-audit"
         ],
+        "webaudit": [
+          "accessenabled-webaudit"
+        ],
         "mock": [
           "accessenabled-testsite"
         ]
       }
     }
-  }
+  },
+  "etags": {}
 }

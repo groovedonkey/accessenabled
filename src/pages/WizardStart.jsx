@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Globe, Trash2, ChevronRight } from 'lucide-react';
+import { Plus, Globe, Trash2, ChevronRight, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../AuthContext.jsx';
 import { listAudits, createAudit, removeAudit } from '../auditService.js';
 import { summarize } from '../checklist.js';
 import ScoreBadge from '../components/ScoreBadge.jsx';
 
-export default function Dashboard() {
+export default function WizardStart() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [audits, setAudits] = useState([]);
@@ -51,7 +51,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard">
       <section className="new-audit-card">
-        <h2><Globe size={20} /> New website audit</h2>
+        <h2><ClipboardCheck size={20} /> New guided audit</h2>
         <form onSubmit={handleCreate} className="new-audit-form">
           <input
             type="text"
@@ -70,10 +70,13 @@ export default function Dashboard() {
             aria-label="Client name"
           />
           <button className="btn btn-primary" type="submit" disabled={creating}>
-            <Plus size={18} /> {creating ? 'Creating…' : 'Create & scan'}
+            <Plus size={18} /> {creating ? 'Creating…' : 'Start guided audit'}
           </button>
         </form>
-        <p className="hint">A new audit is created, then the automated scan runs and pre-fills your checklist.</p>
+        <p className="hint">
+          The wizard walks you through every WCAG 2.2 &amp; ADA checklist item one at a time.
+          Mark each Pass, Fail, or N/A — failed items reveal step-by-step fix guidance.
+        </p>
       </section>
 
       <section className="audit-list">
@@ -81,7 +84,7 @@ export default function Dashboard() {
         {loading ? (
           <div className="spinner" aria-label="Loading audits" />
         ) : audits.length === 0 ? (
-          <p className="empty">No audits yet. Create one above to get started.</p>
+          <p className="empty">No audits yet. Start one above to begin.</p>
         ) : (
           <ul>
             {audits.map((a) => {
@@ -90,13 +93,13 @@ export default function Dashboard() {
                 <li key={a.id} className="audit-row" onClick={() => navigate(`/audit/${a.id}`)}>
                   <div className="audit-row-main">
                     <div className="audit-row-title">{a.client || a.url || 'Untitled audit'}</div>
-                    <div className="audit-row-sub">{a.url}</div>
+                    <div className="audit-row-sub"><Globe size={13} /> {a.url}</div>
                   </div>
                   <div className="audit-row-meta">
                     <ScoreBadge score={s.score} />
                     <span className="chip chip-pass">{s.pass} pass</span>
                     <span className="chip chip-fail">{s.fail} fail</span>
-                    <span className="chip chip-manual">{s.manual} manual</span>
+                    <span className="chip">{s.untested} left</span>
                   </div>
                   <button className="btn btn-ghost danger" onClick={(e) => handleDelete(e, a.id)} title="Delete">
                     <Trash2 size={18} />
