@@ -74,8 +74,8 @@ export default function WizardStart() {
           </button>
         </form>
         <p className="hint">
-          The wizard walks you through every WCAG 2.2 &amp; ADA checklist item one at a time.
-          Mark each Pass, Fail, or N/A — failed items reveal step-by-step fix guidance.
+          Enter the project URL and name, then run an initial automated scan (single or multi-page).
+          The wizard guides you through each failed item with fix steps, then the items needing manual review.
         </p>
       </section>
 
