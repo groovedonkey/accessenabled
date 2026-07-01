@@ -1,7 +1,9 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import { setGlobalOptions } from 'firebase-functions/v2';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import nodemailer from 'nodemailer';
 import puppeteer from 'puppeteer-core';
 import chromium from '@sparticuz/chromium';
 import { readFileSync } from 'node:fs';
@@ -12,6 +14,57 @@ const axeSource = readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
 
 initializeApp();
 const db = getFirestore();
+
+const ADMIN_NOTIFICATION_EMAIL = process.env.CONTACT_NOTIFICATION_EMAIL || process.env.ADMIN_EMAIL;
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+const SMTP_SECURE = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_FROM = process.env.SMTP_FROM || `no-reply@${process.env.SMTP_FROM_DOMAIN || 'example.com'}`;
+
+function createMailTransport() {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !ADMIN_NOTIFICATION_EMAIL) {
+    throw new Error('Missing SMTP_HOST, SMTP_USER, SMTP_PASS, or CONTACT_NOTIFICATION_EMAIL environment variables.');
+  }
+
+  return nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: SMTP_PORT,
+    secure: SMTP_SECURE,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS
+    }
+  });
+}
+
+function formatLeadEmail({ name, email, website, plan, message, createdAt }) {
+  const createdAtText = createdAt instanceof Date ? createdAt.toISOString() : `${createdAt}`;
+  return {
+    subject: `New AccessEnabled lead from ${name || email || 'unknown prospect'}`,
+    text: [
+      'A new landing page request has been submitted.',
+      `Name: ${name || '—'}`,
+      `Email: ${email || '—'}`,
+      `Website: ${website || '—'}`,
+      `Interest: ${plan || '—'}`,
+      `Message: ${message || '—'}`,
+      `Submitted: ${createdAtText}`
+    ].join('\n'),
+    html: `
+      <p>A new landing page request has been submitted.</p>
+      <ul>
+        <li><strong>Name:</strong> ${name || '—'}</li>
+        <li><strong>Email:</strong> ${email || '—'}</li>
+        <li><strong>Website:</strong> ${website || '—'}</li>
+        <li><strong>Interest:</strong> ${plan || '—'}</li>
+        <li><strong>Message:</strong> ${message || '—'}</li>
+        <li><strong>Submitted:</strong> ${createdAtText}</li>
+      </ul>
+    `
+  };
+}
 
 // Headless Chromium + axe-core need a generous timeout and memory ceiling.
 // Whole-site scans (up to SITE_MAX_PAGES) need more headroom than a single page.
@@ -192,6 +245,43 @@ export const scanUrl = onCall(async (request) => {
     if (err instanceof HttpsError) throw err;
     throw new HttpsError('internal', `Scan failed: ${err.message}`);
   }
+});
+
+export const notifyLeadCreated = onDocumentCreated('leads/{leadId}', async (event) => {
+  if (!event?.data) {
+    console.warn('notifyLeadCreated called without event data.');
+    return;
+  }
+
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS || !ADMIN_NOTIFICATION_EMAIL) {
+    console.warn('Email notification skipped; required SMTP / admin email env vars are not configured.');
+    return;
+  }
+  const snapshot = event.data;
+  const lead = snapshot.data?.();
+  if (!lead) {
+    console.warn('notifyLeadCreated called with empty document snapshot.');
+    return;
+  }
+  const createdAt = lead.createdAt?.toDate?.() || lead.createdAt || new Date();
+  const { subject, text, html } = formatLeadEmail({
+    name: lead.name,
+    email: lead.email,
+    website: lead.website,
+    plan: lead.plan,
+    message: lead.message,
+    createdAt
+  });
+
+  const transporter = createMailTransport();
+  await transporter.sendMail({
+    from: SMTP_FROM,
+    to: ADMIN_NOTIFICATION_EMAIL,
+    replyTo: lead.email,
+    subject,
+    text,
+    html
+  });
 });
 
 // Collect same-origin, crawlable links from the current page.

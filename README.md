@@ -70,6 +70,33 @@ In the Firebase Console, enable:
 - **Storage**
 - Upgrade the project to the **Blaze** plan (needed for Functions egress + Puppeteer).
 
+## Landing page lead notifications
+
+This app stores new landing-page submissions in Firestore under `leads/{leadId}`. A Cloud Function now sends an email notification whenever a new lead is created.
+
+Set the following environment values in your Functions runtime before deployment.
+The new trigger reads direct environment variables, so set them with your provider's function environment settings or the Firebase CLI.
+
+```bash
+firebase functions:env:set SMTP_HOST="smtp.example.com" \
+   SMTP_PORT="587" \
+   SMTP_SECURE="false" \
+   SMTP_USER="your-smtp-user" \
+   SMTP_PASS="your-smtp-password" \
+   CONTACT_NOTIFICATION_EMAIL="you@example.com"
+```
+
+For local development, make sure the same environment variables are available before starting the emulator:
+
+```bash
+export SMTP_HOST=mail.groovedonkey.com
+export SMTP_PORT=465
+export SMTP_SECURE=false
+export SMTP_USER=dro@groovedonkey.com
+export SMTP_PASS=Murc13l@go!
+export CONTACT_NOTIFICATION_EMAIL=dro@groovedonkey.com
+```
+
 ---
 
 ## Develop
