@@ -33,13 +33,6 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.origin === self.location.origin,
-            handler: "NetworkFirst",
-            options: { cacheName: "app-shell" },
-          },
-        ],
       },
     }),
   ],

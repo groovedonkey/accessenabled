@@ -20,7 +20,9 @@ import { blankResults } from "./checklist";
 
 function ensureFirebaseReady() {
   if (!db || !functions) {
-    throw new Error("Audit services are unavailable: Firebase is not configured.");
+    throw new Error(
+      "Audit services are unavailable: Firebase is not configured.",
+    );
   }
 }
 
