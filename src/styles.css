@@ -1340,21 +1340,211 @@ a {
 }
 
 /* ---------- responsive ---------- */
-@media (max-width: 640px) {
-  .status-box {
-    width: 48px;
+@media (min-width: 1200px) {
+  .content {
+    max-width: 1120px;
+    padding-left: 24px;
+    padding-right: 24px;
   }
-  .audit-header-actions {
+
+  .wizard {
+    max-width: 840px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .content {
+    max-width: none;
+    padding: 20px 14px 56px;
+  }
+
+  .new-audit-form input {
+    min-width: 180px;
+  }
+
+  .audit-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .audit-row-meta {
     width: 100%;
   }
-  .audit-header-actions .btn {
-    flex: 1;
+
+  .audit-row .btn-ghost.danger {
+    margin-left: auto;
+  }
+
+  .wizard {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 10px 12px;
+    gap: 10px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .topbar-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .tagline-mini {
+    font-size: 12px;
+  }
+
+  .content {
+    padding: 16px 12px 52px;
+  }
+
+  .new-audit-card,
+  .wizard-card {
+    padding: 16px;
+  }
+
+  .new-audit-form {
+    flex-direction: column;
+  }
+
+  .new-audit-form input,
+  .new-audit-form .btn {
+    width: 100%;
+  }
+
+  .audit-header {
+    align-items: flex-start;
+  }
+
+  .audit-header-info {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .audit-header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .scan-scope {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .scan-scope label {
+    flex: 1 1 240px;
     justify-content: center;
   }
+
+  .audit-summary {
+    align-items: flex-start;
+  }
+
+  .save-state {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .check-item-row {
+    flex-wrap: wrap;
+  }
+
+  .check-boxes {
+    width: 100%;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .status-box {
+    width: 100%;
+  }
+
+  .check-item-main {
+    width: 100%;
+  }
+
+  .wizard-topbar {
+    flex-wrap: wrap;
+  }
+
+  .wizard-progress {
+    order: 3;
+    width: 100%;
+  }
+
   .wizard-status {
     flex-direction: column;
   }
+
+  .wizard-nav {
+    flex-wrap: wrap;
+  }
+
+  .wizard-nav .btn {
+    flex: 1 1 150px;
+  }
+}
+
+@media (max-width: 640px) {
+  .audit-header-actions {
+    width: 100%;
+  }
+
+  .audit-header-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .scan-scope label {
+    flex: 1 1 100%;
+  }
+
+  .check-boxes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .status-box {
+    min-height: 44px;
+  }
+
+  .wizard-fix-example {
+    white-space: pre-wrap;
+  }
+
   .wizard-nav .btn {
     flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar-brand span {
+    display: none;
+  }
+
+  .content {
+    padding: 14px 10px 46px;
+  }
+
+  .audit-row {
+    padding: 12px;
+  }
+
+  .audit-row-meta {
+    gap: 4px;
+  }
+
+  .chip {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .wizard-card,
+  .wizard-block,
+  .wizard-fix,
+  .wizard-scan-findings {
+    padding: 12px;
   }
 }

@@ -611,16 +611,148 @@
 }
 
 /* ---------- responsive ---------- */
-@media (max-width: 900px) {
+@media (min-width: 1280px) {
+  .lp-hero {
+    padding-top: 110px;
+    padding-bottom: 100px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .lp-nav-inner,
+  .lp-hero,
+  .lp-why,
+  .lp-pricing,
+  .lp-contact,
+  .lp-footer {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
   .lp-why-grid,
   .lp-plans {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
+
+  .lp-plan-featured {
+    grid-column: span 2;
+  }
+
   .lp-contact-inner {
-    grid-template-columns: 1fr;
     gap: 32px;
   }
+}
+
+@media (max-width: 900px) {
+  .lp-hero {
+    padding: 72px 20px 68px;
+  }
+
+  .lp-nav-links {
+    gap: 12px;
+  }
+
   .lp-nav-links a:not(.lp-nav-cta) {
     display: none;
+  }
+
+  .lp-nav-cta {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .lp-why-grid,
+  .lp-plans,
+  .lp-contact-inner {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-plan-featured {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .lp-nav-inner {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .lp-brand {
+    font-size: 17px;
+  }
+
+  .lp-nav-links {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .lp-nav-cta {
+    width: 100%;
+    text-align: center;
+  }
+
+  .lp-hero {
+    padding: 62px 14px 54px;
+    text-align: left;
+  }
+
+  .lp-hero-inner {
+    max-width: 100%;
+  }
+
+  .lp-sub {
+    text-align: left;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .lp-hero-actions {
+    justify-content: stretch;
+  }
+
+  .lp-hero-actions .lp-btn {
+    width: 100%;
+  }
+
+  .lp-hero-badges {
+    justify-content: flex-start;
+    gap: 10px 14px;
+  }
+
+  .lp-section-head {
+    text-align: left;
+    margin-bottom: 32px;
+  }
+
+  .lp-section-head p {
+    font-size: 16px;
+  }
+
+  .lp-why,
+  .lp-pricing,
+  .lp-contact,
+  .lp-footer {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .lp-why,
+  .lp-pricing {
+    padding-top: 56px;
+    padding-bottom: 56px;
+  }
+
+  .lp-plan {
+    padding: 24px 18px;
+  }
+
+  .lp-price-now {
+    font-size: 32px;
+  }
+
+  .lp-form {
+    padding: 22px 18px;
   }
 }
