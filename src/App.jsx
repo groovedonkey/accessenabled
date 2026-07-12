@@ -5,6 +5,7 @@ import AuditView from "./pages/AuditView.jsx";
 import WizardStart from "./pages/WizardStart.jsx";
 import Wizard from "./pages/Wizard.jsx";
 import Layout from "./components/Layout.jsx";
+import { firebaseReady, firebaseError } from "./firebase.js";
 import "./landing.css";
 
 // Internal scan-tool pages share the Layout (the "me"-facing app).
@@ -61,8 +62,33 @@ function LandingApp() {
   );
 }
 
+function ConfigErrorScreen() {
+  return (
+    <div className="centered-screen" style={{ padding: "24px" }}>
+      <div className="login-card" role="alert" style={{ maxWidth: "720px" }}>
+        <h1 style={{ marginTop: 0 }}>Configuration Error</h1>
+        <p style={{ marginBottom: "8px" }}>
+          The app could not start because Firebase is not configured correctly.
+        </p>
+        <p className="error-text" style={{ marginTop: 0 }}>
+          {firebaseError || "Unknown Firebase initialization error."}
+        </p>
+        <p className="fineprint" style={{ marginBottom: 0 }}>
+          Add the required VITE_FB_* values and redeploy/restart.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  if (isScannerHost) return <ScannerApp />;
-  if (isWebAuditHost) return <WebAuditApp />;
+  if (isScannerHost) {
+    if (!firebaseReady) return <ConfigErrorScreen />;
+    return <ScannerApp />;
+  }
+  if (isWebAuditHost) {
+    if (!firebaseReady) return <ConfigErrorScreen />;
+    return <WebAuditApp />;
+  }
   return <LandingApp />;
 }

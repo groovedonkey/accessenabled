@@ -4,8 +4,6 @@
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "./firebase";
 
-const leadsRef = collection(db, "leads");
-
 export async function createLead({
   name,
   email,
@@ -13,6 +11,11 @@ export async function createLead({
   plan = "free-consult",
   message = "",
 }) {
+  if (!db) {
+    throw new Error("Lead capture is unavailable: Firebase is not configured.");
+  }
+
+  const leadsRef = collection(db, "leads");
   const docRef = await addDoc(leadsRef, {
     name: name || "",
     email: email || "",

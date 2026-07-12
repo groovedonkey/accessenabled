@@ -18,9 +18,15 @@ import { httpsCallable } from "firebase/functions";
 import { db, functions } from "./firebase";
 import { blankResults } from "./checklist";
 
-const auditsRef = collection(db, "audits");
+function ensureFirebaseReady() {
+  if (!db || !functions) {
+    throw new Error("Audit services are unavailable: Firebase is not configured.");
+  }
+}
 
 export async function createAudit(uid, { url, client = "", notes = "" }) {
+  ensureFirebaseReady();
+  const auditsRef = collection(db, "audits");
   const docRef = await addDoc(auditsRef, {
     ownerUid: uid,
     url: url || "",
@@ -37,11 +43,14 @@ export async function createAudit(uid, { url, client = "", notes = "" }) {
 }
 
 export async function getAudit(id) {
+  ensureFirebaseReady();
   const snap = await getDoc(doc(db, "audits", id));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
 export async function listAudits(uid) {
+  ensureFirebaseReady();
+  const auditsRef = collection(db, "audits");
   const q = query(
     auditsRef,
     where("ownerUid", "==", uid),
@@ -52,6 +61,7 @@ export async function listAudits(uid) {
 }
 
 export async function saveAudit(id, patch) {
+  ensureFirebaseReady();
   await updateDoc(doc(db, "audits", id), {
     ...patch,
     updatedAt: serverTimestamp(),
@@ -59,16 +69,17 @@ export async function saveAudit(id, patch) {
 }
 
 export async function removeAudit(id) {
+  ensureFirebaseReady();
   await deleteDoc(doc(db, "audits", id));
 }
 
 // Invokes the Puppeteer + axe-core Cloud Function.
 // Whole-site scans crawl up to 10 pages, so allow the full server timeout.
-const scanUrlCallable = httpsCallable(functions, "scanUrl", {
-  timeout: 300000,
-});
-
 export async function runScan(url, scope = "page", maxPages = 10) {
+  ensureFirebaseReady();
+  const scanUrlCallable = httpsCallable(functions, "scanUrl", {
+    timeout: 300000,
+  });
   const res = await scanUrlCallable({ url, scope, maxPages });
   return res.data;
 }

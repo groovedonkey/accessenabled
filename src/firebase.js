@@ -20,13 +20,34 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FB_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+const hasRequiredConfig =
+  !!firebaseConfig.apiKey &&
+  !!firebaseConfig.authDomain &&
+  !!firebaseConfig.projectId &&
+  !!firebaseConfig.appId;
 
-export const auth = getAuth(app);
+let app = null;
+let firebaseInitError = "";
+
+if (!hasRequiredConfig) {
+  firebaseInitError =
+    "Firebase config is missing. Set VITE_FB_API_KEY and VITE_FB_APP_ID in your environment.";
+} else {
+  try {
+    app = initializeApp(firebaseConfig);
+  } catch (err) {
+    firebaseInitError =
+      err?.message || "Failed to initialize Firebase. Check your config.";
+  }
+}
+
+export const auth = app ? getAuth(app) : null;
 export const googleProvider = new GoogleAuthProvider();
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const db = app ? getFirestore(app) : null;
+export const storage = app ? getStorage(app) : null;
 // Scan engine runs in us-central1 by default.
-export const functions = getFunctions(app, "us-central1");
+export const functions = app ? getFunctions(app, "us-central1") : null;
+export const firebaseReady = !!app;
+export const firebaseError = firebaseInitError;
 
 export default app;
