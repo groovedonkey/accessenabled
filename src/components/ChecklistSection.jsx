@@ -1,19 +1,28 @@
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
-import ChecklistItem from './ChecklistItem.jsx';
-import { summarize } from '../checklist.js';
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import ChecklistItem from "./ChecklistItem.jsx";
+import { summarize } from "../checklist.js";
 
 export default function ChecklistSection({ section, results, onUpdate }) {
   const [open, setOpen] = useState(true);
 
   const sectionResults = {};
-  section.items.forEach((it) => { sectionResults[it.ref] = results[it.ref] || { status: 'untested' }; });
+  section.items.forEach((it) => {
+    sectionResults[it.ref] = results[it.ref] || { status: "untested" };
+  });
   const s = summarize(sectionResults);
 
   return (
     <section className="checklist-section">
-      <button className="section-head" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <ChevronDown size={20} className={`section-caret ${open ? 'open' : ''}`} />
+      <button
+        className="section-head"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        <ChevronDown
+          size={20}
+          className={`section-caret ${open ? "open" : ""}`}
+        />
         <span className="section-number">{section.number}</span>
         <span className="section-title">
           <strong>{section.title}</strong>
@@ -31,7 +40,13 @@ export default function ChecklistSection({ section, results, onUpdate }) {
             <ChecklistItem
               key={item.ref}
               item={item}
-              result={results[item.ref] || { status: 'untested', note: '', findings: [] }}
+              result={
+                results[item.ref] || {
+                  status: "untested",
+                  note: "",
+                  findings: [],
+                }
+              }
               onUpdate={(change) => onUpdate(item.ref, change)}
             />
           ))}

@@ -12,16 +12,17 @@ Built to run on an **iPad Pro (Chrome)** as an installable PWA, backed by **Fire
 
 ## Architecture
 
-| Layer | Tech |
-|-------|------|
-| Frontend | Vite + React 18, React Router, Lucide icons, `vite-plugin-pwa` |
-| Auth | Firebase Auth (Google sign-in) |
-| Database | Cloud Firestore (`audits` collection, owned per-user) |
+| Layer       | Tech                                                                               |
+| ----------- | ---------------------------------------------------------------------------------- |
+| Frontend    | Vite + React 18, React Router, Lucide icons, `vite-plugin-pwa`                     |
+| Auth        | Firebase Auth (Google sign-in)                                                     |
+| Database    | Cloud Firestore (`audits` collection, owned per-user)                              |
 | Scan engine | Firebase **Cloud Functions v2** running **Puppeteer (headless Chrome) + axe-core** |
-| Hosting | Firebase Hosting (SPA) |
-| Reports | Browser print-to-PDF (works on iPad/Chrome, no extra deps) |
+| Hosting     | Firebase Hosting (SPA)                                                             |
+| Reports     | Browser print-to-PDF (works on iPad/Chrome, no extra deps)                         |
 
 ### How a website audit works
+
 1. Enter a URL (and optional client name) on the dashboard.
 2. App creates an `audit` doc and calls the `scanUrl` Cloud Function.
 3. The function loads the page in headless Chrome, injects **axe-core**, runs WCAG 2.0/2.1/2.2 A & AA rule sets, plus custom detectors (accessibility-statement link, overlay-widget reliance).
@@ -65,6 +66,7 @@ firebase use accessenabled-3e90e
 ```
 
 In the Firebase Console, enable:
+
 - **Authentication → Sign-in method → Google**
 - **Firestore Database** (production mode)
 - **Storage**
@@ -146,6 +148,7 @@ accessenabled/
 ---
 
 ## Roadmap ideas
+
 - **Physical location audits**: add an `auditType` of `physical` with an on-site checklist (entrances, parking, signage, restrooms) — the data model already supports a `type` field.
 - **Multi-page crawl**: scan several URLs per client in one audit.
 - **Screenshot evidence**: capture failing elements via Puppeteer into Storage.

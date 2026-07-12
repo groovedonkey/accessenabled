@@ -15,9 +15,11 @@ checklist. Nothing here is meant to be deployed publicly.
 Pick one option from inside the `a11y-practice-site` folder.
 
 **Option A — Python (no install needed on most Macs):**
+
 ```
 python3 -m http.server 8000
 ```
+
 Then open http://localhost:8000
 
 **Option B — Just open the files:**
@@ -32,6 +34,7 @@ mimics a real environment, which is better for auditing.)
 > WCAG-style category. This is not exhaustive — there may be smaller issues too.
 
 ### Global / all pages
+
 - **Missing `lang` attribute** on `<html>` (WCAG 3.1.1).
 - **Generic, identical page titles** — every page is just "Brew Haven" (WCAG 2.4.2).
 - **No skip-to-content link** (WCAG 2.4.1).
@@ -44,6 +47,7 @@ mimics a real environment, which is better for auditing.)
   focusable, no role, no Enter/Space support (WCAG 2.1.1, 4.1.2).
 
 ### index.html (Home)
+
 - **Hero image has no `alt`** (WCAG 1.1.1).
 - **Two of three card images missing/poor `alt`** (one has `alt="coffee"`, vague).
 - **Heading order skips** — `<h1>` then `<h4>` in the hero, and section uses `<h3>`
@@ -59,6 +63,7 @@ mimics a real environment, which is better for auditing.)
 - **Empty link** in footer (`<a href="#"></a>`) with no text (WCAG 2.4.4, 4.1.2).
 
 ### menu.html (Menu)
+
 - **Heading jump** — `<h2>` straight to `<h5>` category headings (WCAG 1.3.1).
 - **Menu item images have no `alt`** (WCAG 1.1.1).
 - **Image zoom is mouse-only** — `onclick` on `<img>`, not keyboard operable, no
@@ -66,6 +71,7 @@ mimics a real environment, which is better for auditing.)
 - **Allergen info by color only** — nut items shown only in red text (WCAG 1.4.1).
 
 ### contact.html (Contact)
+
 - **Inputs not associated with labels** — "Name" and "Message" are plain text next to
   the field; the "Email" `<label>` has no `for` (WCAG 1.3.1, 3.3.2, 4.1.2).
 - **Checkbox not labeled** — adjacent `<span>` not tied to the input (WCAG 1.3.1).
@@ -78,6 +84,7 @@ mimics a real environment, which is better for auditing.)
 ---
 
 ## Suggested checklist to practice with
+
 - Images & non-text content (alt text)
 - Color contrast (text, UI)
 - Information conveyed by color alone

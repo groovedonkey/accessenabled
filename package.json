@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "format": "prettier --write \"**/*.{js,jsx,css,html,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,css,html,json,md}\"",
     "preview": "vite preview",
     "emulators": "firebase emulators:start",
     "deploy": "npm run build && firebase deploy",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "prettier": "^3.6.2",
     "vite": "^6.0.5",
     "vite-plugin-pwa": "^0.21.1"
   }

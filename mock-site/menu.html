@@ -1,86 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Brew Haven</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="topbar">
-        <div class="logo">Brew Haven</div>
-        <div class="nav">
-            <a href="index.html">Home</a>
-            <a href="menu.html">Menu</a>
-            <a href="contact.html">Contact</a>
-        </div>
+      <div class="logo">Brew Haven</div>
+      <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="contact.html">Contact</a>
+      </div>
     </div>
 
     <div class="section">
-        <h2>Our Menu</h2>
-        <p>Prices shown in USD. Tap an item to see it bigger.</p>
+      <h2>Our Menu</h2>
+      <p>Prices shown in USD. Tap an item to see it bigger.</p>
 
-        <!-- Category headings skip from h2 to h5 -->
-        <h5>Espresso Drinks</h5>
-        <div class="menu-grid">
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&q=70" onclick="zoom(this)">
-                <div class="menu-name">Espresso</div>
-                <div class="menu-price">$3.00</div>
-            </div>
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=300&q=70" onclick="zoom(this)">
-                <div class="menu-name">Cappuccino</div>
-                <div class="menu-price">$4.50</div>
-            </div>
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=300&q=70" onclick="zoom(this)">
-                <div class="menu-name">Flat White</div>
-                <div class="menu-price">$4.75</div>
-            </div>
+      <!-- Category headings skip from h2 to h5 -->
+      <h5>Espresso Drinks</h5>
+      <div class="menu-grid">
+        <div class="menu-item">
+          <img
+            src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&q=70"
+            onclick="zoom(this)"
+          />
+          <div class="menu-name">Espresso</div>
+          <div class="menu-price">$3.00</div>
         </div>
-
-        <h5>Cold Drinks</h5>
-        <div class="menu-grid">
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300&q=70" onclick="zoom(this)">
-                <div class="menu-name">Iced Latte</div>
-                <div class="menu-price">$5.00</div>
-            </div>
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1558857563-b371033873b8?w=300&q=70" onclick="zoom(this)">
-                <div class="menu-name">Cold Brew</div>
-                <div class="menu-price">$4.25</div>
-            </div>
-            <div class="menu-item">
-                <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&q=70" onclick="zoom(this)">
-                <div class="menu-name">Nitro</div>
-                <div class="menu-price">$5.50</div>
-            </div>
+        <div class="menu-item">
+          <img
+            src="https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?w=300&q=70"
+            onclick="zoom(this)"
+          />
+          <div class="menu-name">Cappuccino</div>
+          <div class="menu-price">$4.50</div>
         </div>
+        <div class="menu-item">
+          <img
+            src="https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=300&q=70"
+            onclick="zoom(this)"
+          />
+          <div class="menu-name">Flat White</div>
+          <div class="menu-price">$4.75</div>
+        </div>
+      </div>
 
-        <h5>Pastries</h5>
-        <!-- Allergen info conveyed by color only -->
-        <p>Items in <span style="color:#d33">red</span> contain nuts.</p>
-        <ul class="pastry-list">
-            <li>Croissant - $3.00</li>
-            <li style="color:#d33">Almond Danish - $3.50</li>
-            <li>Blueberry Muffin - $3.25</li>
-            <li style="color:#d33">Pecan Roll - $4.00</li>
-            <li>Chocolate Chip Cookie - $2.50</li>
-        </ul>
+      <h5>Cold Drinks</h5>
+      <div class="menu-grid">
+        <div class="menu-item">
+          <img
+            src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300&q=70"
+            onclick="zoom(this)"
+          />
+          <div class="menu-name">Iced Latte</div>
+          <div class="menu-price">$5.00</div>
+        </div>
+        <div class="menu-item">
+          <img
+            src="https://images.unsplash.com/photo-1558857563-b371033873b8?w=300&q=70"
+            onclick="zoom(this)"
+          />
+          <div class="menu-name">Cold Brew</div>
+          <div class="menu-price">$4.25</div>
+        </div>
+        <div class="menu-item">
+          <img
+            src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300&q=70"
+            onclick="zoom(this)"
+          />
+          <div class="menu-name">Nitro</div>
+          <div class="menu-price">$5.50</div>
+        </div>
+      </div>
+
+      <h5>Pastries</h5>
+      <!-- Allergen info conveyed by color only -->
+      <p>Items in <span style="color: #d33">red</span> contain nuts.</p>
+      <ul class="pastry-list">
+        <li>Croissant - $3.00</li>
+        <li style="color: #d33">Almond Danish - $3.50</li>
+        <li>Blueberry Muffin - $3.25</li>
+        <li style="color: #d33">Pecan Roll - $4.00</li>
+        <li>Chocolate Chip Cookie - $2.50</li>
+      </ul>
     </div>
 
     <!-- Zoom overlay -->
     <div id="overlay" class="overlay" onclick="closeZoom()">
-        <img id="overlay-img" src="">
+      <img id="overlay-img" src="" />
     </div>
 
     <div class="footer">
-        <p>Brew Haven &copy; 2024</p>
-        <a href="contact.html">Contact</a>
+      <p>Brew Haven &copy; 2024</p>
+      <a href="contact.html">Contact</a>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

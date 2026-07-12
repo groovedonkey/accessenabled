@@ -1,68 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Brew Haven</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <div class="topbar">
-        <div class="logo">Brew Haven</div>
-        <div class="nav">
-            <a href="index.html">Home</a>
-            <a href="menu.html">Menu</a>
-            <a href="contact.html">Contact</a>
+      <div class="logo">Brew Haven</div>
+      <div class="nav">
+        <a href="index.html">Home</a>
+        <a href="menu.html">Menu</a>
+        <a href="contact.html">Contact</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <h1>Get In Touch</h1>
+      <p>
+        We'd love to hear from you. Fill out the form and we'll get back to you
+        soon.
+      </p>
+
+      <form class="contact-form" onsubmit="return fakeSubmit();">
+        <div class="field">
+          Name
+          <input type="text" id="name" />
         </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="text" id="email" />
+        </div>
+        <div class="field">
+          <label for="topic">Topic</label>
+          <select id="topic">
+            <option>General Question</option>
+            <option>Catering</option>
+            <option>Complaint</option>
+          </select>
+        </div>
+        <div class="field">
+          Message
+          <textarea rows="5"></textarea>
+        </div>
+        <div class="field">
+          <input type="checkbox" id="agree" />
+          <span>I agree to be contacted</span>
+        </div>
+        <div class="submit-btn" onclick="fakeSubmit()">Send Message</div>
+      </form>
+
+      <p class="required-note" style="color: #bbb">* All fields are required</p>
     </div>
 
     <div class="section">
-        <h1>Get In Touch</h1>
-        <p>We'd love to hear from you. Fill out the form and we'll get back to you soon.</p>
-
-        <form class="contact-form" onsubmit="return fakeSubmit()">
-            <div class="field">
-                Name
-                <input type="text" id="name">
-            </div>
-            <div class="field">
-                <label>Email</label>
-                <input type="text" id="email">
-            </div>
-            <div class="field">
-                <label for="topic">Topic</label>
-                <select id="topic">
-                    <option>General Question</option>
-                    <option>Catering</option>
-                    <option>Complaint</option>
-                </select>
-            </div>
-            <div class="field">
-                Message
-                <textarea rows="5"></textarea>
-            </div>
-            <div class="field">
-                <input type="checkbox" id="agree">
-                <span>I agree to be contacted</span>
-            </div>
-            <div class="submit-btn" onclick="fakeSubmit()">Send Message</div>
-        </form>
-
-        <p class="required-note" style="color:#bbb">* All fields are required</p>
-    </div>
-
-    <div class="section">
-        <h3>Find Us</h3>
-        <p>123 Main Street, Coffeeville, CA 90210</p>
-        <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=70" class="map">
-        <p>Phone: <a href="tel:5550123">555-0123</a></p>
+      <h3>Find Us</h3>
+      <p>123 Main Street, Coffeeville, CA 90210</p>
+      <img
+        src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=70"
+        class="map"
+      />
+      <p>Phone: <a href="tel:5550123">555-0123</a></p>
     </div>
 
     <div class="footer">
-        <p>Brew Haven &copy; 2024</p>
-        <a href="index.html">Home</a>
+      <p>Brew Haven &copy; 2024</p>
+      <a href="index.html">Home</a>
     </div>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>

@@ -1,32 +1,47 @@
 // Generates a printable audit report and opens the browser print dialog
 // (Save as PDF). This works reliably on iPad/Chrome with no extra deps.
 
-import { CHECKLIST, summarize } from './checklist';
+import { CHECKLIST, summarize } from "./checklist";
 
-const STATUS_LABEL = { pass: 'PASS', fail: 'FAIL', manual: 'MANUAL', na: 'N/A', untested: '—' };
+const STATUS_LABEL = {
+  pass: "PASS",
+  fail: "FAIL",
+  manual: "MANUAL",
+  na: "N/A",
+  untested: "—",
+};
 
 export function exportAuditPdf(audit, results) {
   const s = summarize(results);
-  const win = window.open('', '_blank');
-  if (!win) { alert('Allow pop-ups to export the report.'); return; }
+  const win = window.open("", "_blank");
+  if (!win) {
+    alert("Allow pop-ups to export the report.");
+    return;
+  }
 
   const rows = CHECKLIST.map((section) => {
-    const items = section.items.map((it) => {
-      const r = results[it.ref] || { status: 'untested', note: '' };
-      const findings = (r.findings || [])
-        .map((f) => `${f.ruleId || f.type || ''}${f.nodeCount ? ` (${f.nodeCount})` : ''}`)
-        .filter(Boolean).join(', ');
-      return `<tr class="st-${r.status}">
+    const items = section.items
+      .map((it) => {
+        const r = results[it.ref] || { status: "untested", note: "" };
+        const findings = (r.findings || [])
+          .map(
+            (f) =>
+              `${f.ruleId || f.type || ""}${f.nodeCount ? ` (${f.nodeCount})` : ""}`,
+          )
+          .filter(Boolean)
+          .join(", ");
+        return `<tr class="st-${r.status}">
         <td class="ref">${it.ref}<br><small>${it.level}</small></td>
         <td><strong>${esc(it.title)}</strong><div class="proc">${esc(it.procedure)}</div>
-          ${findings ? `<div class="find">Findings: ${esc(findings)}</div>` : ''}
-          ${r.note ? `<div class="note">Note: ${esc(r.note)}</div>` : ''}
+          ${findings ? `<div class="find">Findings: ${esc(findings)}</div>` : ""}
+          ${r.note ? `<div class="note">Note: ${esc(r.note)}</div>` : ""}
         </td>
-        <td class="status">${STATUS_LABEL[r.status] || '—'}</td>
+        <td class="status">${STATUS_LABEL[r.status] || "—"}</td>
       </tr>`;
-    }).join('');
+      })
+      .join("");
     return `<tr class="section-row"><td colspan="3">${section.number}. ${esc(section.title.toUpperCase())}</td></tr>${items}`;
-  }).join('');
+  }).join("");
 
   win.document.write(`<!doctype html><html><head><meta charset="utf-8">
   <title>Accessibility Audit — ${esc(audit.client || audit.url)}</title>
@@ -50,13 +65,13 @@ export function exportAuditPdf(audit, results) {
     @media print{body{margin:12mm;} .section-row td{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
   </style></head><body>
     <h1>Website Accessibility Audit</h1>
-    <p class="url">${esc(audit.url || '')}</p>
+    <p class="url">${esc(audit.url || "")}</p>
     <div class="meta">
-      <div><span class="score">${s.score ?? '—'}${s.score != null ? '%' : ''}</span><br>compliance score</div>
-      <div><strong>Client:</strong> ${esc(audit.client || '—')}</div>
+      <div><span class="score">${s.score ?? "—"}${s.score != null ? "%" : ""}</span><br>compliance score</div>
+      <div><strong>Client:</strong> ${esc(audit.client || "—")}</div>
       <div><strong>Passed:</strong> ${s.pass} &nbsp; <strong>Failed:</strong> ${s.fail} &nbsp;
            <strong>Manual:</strong> ${s.manual} &nbsp; <strong>N/A:</strong> ${s.na}</div>
-      ${audit.scanMeta ? `<div><strong>Scanned:</strong> ${new Date(audit.scanMeta.scannedAt).toLocaleString()} · axe-core ${audit.scanMeta.axeVersion}</div>` : ''}
+      ${audit.scanMeta ? `<div><strong>Scanned:</strong> ${new Date(audit.scanMeta.scannedAt).toLocaleString()} · axe-core ${audit.scanMeta.axeVersion}</div>` : ""}
       <div><strong>Report date:</strong> ${new Date().toLocaleDateString()}</div>
     </div>
     <table><tbody>${rows}</tbody></table>
@@ -68,7 +83,11 @@ export function exportAuditPdf(audit, results) {
 }
 
 function esc(str) {
-  return String(str ?? '').replace(/[&<>"']/g, (c) => (
-    { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
-  ));
+  return String(str ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 }

@@ -1,12 +1,19 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, Save, FileDown, Loader2, CheckCircle2 } from 'lucide-react';
-import { getAudit, saveAudit, runScan } from '../auditService.js';
-import { CHECKLIST, summarize } from '../checklist.js';
-import { applyScanToResults } from '../scanMapper.js';
-import ChecklistSection from '../components/ChecklistSection.jsx';
-import ScoreBadge from '../components/ScoreBadge.jsx';
-import { exportAuditPdf } from '../exportPdf.js';
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  Play,
+  Save,
+  FileDown,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import { getAudit, saveAudit, runScan } from "../auditService.js";
+import { CHECKLIST, summarize } from "../checklist.js";
+import { applyScanToResults } from "../scanMapper.js";
+import ChecklistSection from "../components/ChecklistSection.jsx";
+import ScoreBadge from "../components/ScoreBadge.jsx";
+import { exportAuditPdf } from "../exportPdf.js";
 
 export default function AuditView() {
   const { id } = useParams();
@@ -16,15 +23,18 @@ export default function AuditView() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
-  const [scanScope, setScanScope] = useState('page');
-  const [scanError, setScanError] = useState('');
+  const [scanScope, setScanScope] = useState("page");
+  const [scanError, setScanError] = useState("");
   const [saved, setSaved] = useState(true);
   const saveTimer = useRef(null);
 
   useEffect(() => {
     (async () => {
       const a = await getAudit(id);
-      if (!a) { navigate('/'); return; }
+      if (!a) {
+        navigate("/");
+        return;
+      }
       setAudit(a);
       setResults(a.results || {});
       setLoading(false);
@@ -33,14 +43,17 @@ export default function AuditView() {
   }, [id]);
 
   // Debounced autosave whenever results change.
-  const queueSave = useCallback((nextResults, patch = {}) => {
-    setSaved(false);
-    clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(async () => {
-      await saveAudit(id, { results: nextResults, ...patch });
-      setSaved(true);
-    }, 800);
-  }, [id]);
+  const queueSave = useCallback(
+    (nextResults, patch = {}) => {
+      setSaved(false);
+      clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(async () => {
+        await saveAudit(id, { results: nextResults, ...patch });
+        setSaved(true);
+      }, 800);
+    },
+    [id],
+  );
 
   const updateItem = (ref, change) => {
     setResults((prev) => {
@@ -52,9 +65,12 @@ export default function AuditView() {
 
   const doScan = async (overrideUrl) => {
     const url = overrideUrl || audit?.url;
-    if (!url) { setScanError('Add a URL first.'); return; }
+    if (!url) {
+      setScanError("Add a URL first.");
+      return;
+    }
     setScanning(true);
-    setScanError('');
+    setScanError("");
     try {
       const scan = await runScan(url, scanScope);
       setResults((prev) => {
@@ -67,24 +83,32 @@ export default function AuditView() {
           axeVersion: scan.axeVersion,
           durationMs: scan.durationMs,
           violationCount: (scan.violations || []).length,
-          scope: scan.scope || 'page',
+          scope: scan.scope || "page",
           pagesScanned: scan.pagesScanned || 1,
-          pages: scan.pages || []
+          pages: scan.pages || [],
         };
-        saveAudit(id, { results: merged, scanMeta: meta, status: 'scanned' }).then(() => setSaved(true));
-        setAudit((a) => ({ ...a, scanMeta: meta, status: 'scanned' }));
+        saveAudit(id, {
+          results: merged,
+          scanMeta: meta,
+          status: "scanned",
+        }).then(() => setSaved(true));
+        setAudit((a) => ({ ...a, scanMeta: meta, status: "scanned" }));
         return merged;
       });
     } catch (e) {
       console.error(e);
-      setScanError(e.message || 'Scan failed.');
+      setScanError(e.message || "Scan failed.");
     } finally {
       setScanning(false);
     }
   };
 
   if (loading || !results) {
-    return <div className="centered-screen"><div className="spinner" aria-label="Loading" /></div>;
+    return (
+      <div className="centered-screen">
+        <div className="spinner" aria-label="Loading" />
+      </div>
+    );
   }
 
   const s = summarize(results);
@@ -92,41 +116,61 @@ export default function AuditView() {
   return (
     <div className="audit-view">
       <div className="audit-header">
-        <button className="btn btn-ghost" onClick={() => navigate('/')}><ArrowLeft size={18} /> Back</button>
+        <button className="btn btn-ghost" onClick={() => navigate("/")}>
+          <ArrowLeft size={18} /> Back
+        </button>
         <div className="audit-header-info">
           <h1>{audit.client || audit.url}</h1>
-          <a href={audit.url} target="_blank" rel="noreferrer" className="audit-url">{audit.url}</a>
+          <a
+            href={audit.url}
+            target="_blank"
+            rel="noreferrer"
+            className="audit-url"
+          >
+            {audit.url}
+          </a>
         </div>
         <div className="audit-header-actions">
           <div className="scan-scope" role="radiogroup" aria-label="Scan scope">
-            <label className={scanScope === 'page' ? 'active' : ''}>
+            <label className={scanScope === "page" ? "active" : ""}>
               <input
                 type="radio"
                 name="scan-scope"
                 value="page"
-                checked={scanScope === 'page'}
-                onChange={() => setScanScope('page')}
+                checked={scanScope === "page"}
+                onChange={() => setScanScope("page")}
                 disabled={scanning}
               />
               This page
             </label>
-            <label className={scanScope === 'site' ? 'active' : ''}>
+            <label className={scanScope === "site" ? "active" : ""}>
               <input
                 type="radio"
                 name="scan-scope"
                 value="site"
-                checked={scanScope === 'site'}
-                onChange={() => setScanScope('site')}
+                checked={scanScope === "site"}
+                onChange={() => setScanScope("site")}
                 disabled={scanning}
               />
               Whole site (up to 10 pages)
             </label>
           </div>
-          <button className="btn btn-primary" onClick={() => doScan()} disabled={scanning}>
-            {scanning ? <Loader2 size={18} className="spin" /> : <Play size={18} />}
-            {scanning ? 'Scanning…' : audit.scanMeta ? 'Re-scan' : 'Run scan'}
+          <button
+            className="btn btn-primary"
+            onClick={() => doScan()}
+            disabled={scanning}
+          >
+            {scanning ? (
+              <Loader2 size={18} className="spin" />
+            ) : (
+              <Play size={18} />
+            )}
+            {scanning ? "Scanning…" : audit.scanMeta ? "Re-scan" : "Run scan"}
           </button>
-          <button className="btn btn-secondary" onClick={() => exportAuditPdf(audit, results)}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => exportAuditPdf(audit, results)}
+          >
             <FileDown size={18} /> Export
           </button>
         </div>
@@ -144,30 +188,43 @@ export default function AuditView() {
           <span className="chip">{s.untested} untested</span>
         </div>
         <div className="save-state">
-          {saved ? <><CheckCircle2 size={16} /> Saved</> : <><Save size={16} /> Saving…</>}
+          {saved ? (
+            <>
+              <CheckCircle2 size={16} /> Saved
+            </>
+          ) : (
+            <>
+              <Save size={16} /> Saving…
+            </>
+          )}
         </div>
       </div>
 
       {audit.scanMeta && (
         <p className="scan-meta">
           Last scanned {new Date(audit.scanMeta.scannedAt).toLocaleString()} ·
-          {audit.scanMeta.scope === 'site'
-            ? ` ${audit.scanMeta.pagesScanned} page${audit.scanMeta.pagesScanned === 1 ? '' : 's'} crawled`
-            : ` HTTP ${audit.scanMeta.statusCode}`} ·
-          axe-core {audit.scanMeta.axeVersion} · {audit.scanMeta.violationCount} rule violations
+          {audit.scanMeta.scope === "site"
+            ? ` ${audit.scanMeta.pagesScanned} page${audit.scanMeta.pagesScanned === 1 ? "" : "s"} crawled`
+            : ` HTTP ${audit.scanMeta.statusCode}`}{" "}
+          · axe-core {audit.scanMeta.axeVersion} ·{" "}
+          {audit.scanMeta.violationCount} rule violations
         </p>
       )}
 
-      {audit.scanMeta?.scope === 'site' && audit.scanMeta.pages?.length > 0 && (
+      {audit.scanMeta?.scope === "site" && audit.scanMeta.pages?.length > 0 && (
         <details className="scanned-pages">
           <summary>{audit.scanMeta.pages.length} pages scanned</summary>
           <ul>
             {audit.scanMeta.pages.map((p, i) => (
               <li key={i}>
                 <span className="scanned-page-url">{p.url}</span>
-                {p.error
-                  ? <span className="scanned-page-err">failed: {p.error}</span>
-                  : <span className="scanned-page-stat">HTTP {p.statusCode} · {p.violationCount} violations</span>}
+                {p.error ? (
+                  <span className="scanned-page-err">failed: {p.error}</span>
+                ) : (
+                  <span className="scanned-page-stat">
+                    HTTP {p.statusCode} · {p.violationCount} violations
+                  </span>
+                )}
               </li>
             ))}
           </ul>
